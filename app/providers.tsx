@@ -1,116 +1,168 @@
 'use client';
 import * as React from 'react';
 
+type Lang = 'el' | 'en';
 type Theme = 'light' | 'dark';
-type Lang = 'en' | 'el';
 
-// base keys you can call: t('home'), t('order'), ...
-// …existing imports…
+const DICT: Record<Lang, Record<string, string>> = {
+  el: {
+    // Nav / CTAs
+    home: 'Αρχική',
+    order: 'Παραγγελία',
+    gallery: 'Γκαλερί',
+    about: 'Σχετικά',
+    ctaOrder: 'Ξεκινήστε Παραγγελία',
+    ctaAbout: 'Σχετικά',
+    ctaFAQ: 'Συχνές Ερωτήσεις',
+    learnMore: 'Μάθετε περισσότερα',
 
-// base keys you can call everywhere: t('home'), t('about'), …
-const KEYS = [
-  'home','order','gallery','about',
-  'yourTextHere','line','addLine','chooseFont','finish','height','email','notes','submit','totalLetters','remove',
-    'heroTitle','heroSubtitle','feature1','feature2','feature3','ctaOrder','ctaAbout','ctaFAQ',
+    // Hero
+    heroTitle: 'Όμορφες Ξύλινες Προσωποποιημένες Πινακίδες',
+    heroSubtitle:
+      'Διαλέξτε κείμενο, γραμματοσειρά, φινίρισμα και μέγεθος. Προεπισκόπηση και παραγγελία σε λίγα λεπτά.',
+    feature1: 'Γραμματοσειρές: Alegreya, Montserrat, Times New Roman',
+    feature2: 'Ζωντανή προεπισκόπηση με έως 2–3 γραμμές',
+    feature3: 'Πολλαπλά φινιρίσματα και ύψη',
 
-  // about page
-  'aboutHeadline','aboutFounded','aboutTeam','phone','instagram'
-] as const;
-type BaseKey = typeof KEYS[number];
+    // Audience block
+    audienceTitle: 'Κοινά-στόχοι & ιδέες προϊόντων',
+    weddingsTitle: 'A. Γάμοι & Events',
+    weddingsLine1: 'Το όνομά σας, το δικό σας στυλ — πινακίδες γάμου από ξύλο, χειροποίητες.',
+    weddingsLine2: 'Ονόματα ζευγαριών / “Mr & Mrs” / τραπέζια / candy table',
+    weddingsLine3: 'Φράσεις για photo booth',
+    bundleLabel: 'Πακέτο',
+    bundleValue: '1 μεγάλη λέξη + 2 μικρές για τραπέζια',
 
-const dict: Record<`${BaseKey}_${Lang}`, string> = {
-  home_en:'Home', home_el:'Αρχική',
-  order_en:'Order', order_el:'Παραγγελία',
-  gallery_en:'Gallery', gallery_el:'Γκάλερι',
-  about_en:'About', about_el:'Σχετικά',
+    birthdaysTitle: 'B. Γενέθλια & Parties',
+    birthdaysLine1: 'Ονόματα παιδιών, ηλικία (“Αλέξης 5”)',
+    birthdaysLine2: 'Θεματικές φράσεις (“Party Time”, “Happy B-Day”)',
 
-  yourTextHere_en:'Your Text Here', yourTextHere_el:'Το Κείμενό σας',
-  line_en:'Line', line_el:'Γραμμή',
-  addLine_en:'+ Add Line (max 3)', addLine_el:'+ Προσθήκη Γραμμής (έως 3)',
-  chooseFont_en:'Choose Font', chooseFont_el:'Επιλογή Γραμματοσειράς',
-  finish_en:'Finish', finish_el:'Φινίρισμα',
-  height_en:'Height', height_el:'Ύψος',
-  email_en:'Email', email_el:'Email',
-  notes_en:'Notes', notes_el:'Σημειώσεις',
-  submit_en:'Submit Order', submit_el:'Αποστολή Παραγγελίας',
-  totalLetters_en:'Total Letter Count', totalLetters_el:'Σύνολο Γραμμάτων',
-  remove_en:'Remove', remove_el:'Αφαίρεση',
+    newbornTitle: 'C. Νεογέννητα / Παιδικά δωμάτια',
+    newbornLine1: 'Όνομα για τοίχο / πόρτα',
+    newbornLine2: 'Σετ 3 μικρών λέξεων (“Dream • Play • Smile”)',
 
-  // About content
-  aboutHeadline_en: 'About Lexylon',
-  aboutHeadline_el: 'Σχετικά με τη Lexylon',
-  aboutFounded_en: 'Lexylon was founded in 2024 and has served 1,000+ customers.',
-  aboutFounded_el: 'Η Lexylon δημιουργήθηκε το 2024 και έχει εξυπηρετήσει πάνω από 1000 πελάτες.',
-  aboutTeam_en: 'Our team crafts unique wooden, handmade words—combining art and quality.',
-  aboutTeam_el: 'Η ομάδα μας δημιουργεί μοναδικές ξύλινες, χειροποίητες λέξεις, συνδυάζοντας τέχνη και ποιότητα.',
-  phone_en:'Phone', phone_el:'Τηλέφωνο',
-  instagram_en:'Instagram', instagram_el:'Instagram',
+    educationTitle: 'D. Εκπαιδευτικό / Δάσκαλοι',
+    educationLine1: 'Μικρές λέξεις, μεγάλα χαμόγελα — εκπαιδευτικά ξύλινα γράμματα.',
+    educationLine2: 'Αλφαβητάριο/παιχνίδια λέξεων, “Reading Corner”',
+    educationLine3: 'Δώρα τέλος χρονιάς (όνομα δασκάλου)',
 
-  // Add to dict
-heroTitle_en: 'Beautiful Custom Wooden Signs',
-heroTitle_el: 'Όμορφες Ξύλινες Προσωποποιημένες Πινακίδες',
+    customTitle: 'E. Custom Gifts',
+    customLine1: 'Ζευγάρια, επέτειοι, housewarming (“Home”, “Καλώς ήρθατε”)',
+    customLine2: 'Επιχειρηματικά δώρα (μικρό logo/brand name)',
 
-heroSubtitle_en: 'Pick your text, font, finish, and size. Preview and place your order in minutes.',
-heroSubtitle_el: 'Διαλέξτε κείμενο, γραμματοσειρά, φινίρισμα και μέγεθος. Προεπισκόπηση και παραγγελία σε λίγα λεπτά.',
+    // Process block
+    processTitle: 'Πώς το φτιάχνουμε',
+    processSummary:
+      'Κάθε κατασκευή της Lexylon είναι αποτέλεσμα συνδυασμού τεχνολογίας και χειροποίητης φροντίδας. Ξεκινάμε με το κείμενό σας, προσαρμόζουμε γραμματοσειρά και ύψος και δημιουργούμε το αρχείο κοπής. Προχωράμε στην κοπή του ξύλου με ακρίβεια και στη συνέχεια αφιερώνουμε χρόνο στο τρίψιμο των ακμών και των καμπύλων. Στο τέλος επιλέγετε το φινίρισμα: άβαφο, ματ, βαμμένο ή σκούρο λούστρο. Κάθε λέξη περνάει τελικό ποιοτικό έλεγχο και συσκευάζεται με προσοχή.',
+    processStep1: 'Σχεδίαση & επιλογή γραμματοσειράς/ύψους',
+    processStep2: 'Κοπή ξύλου με ακρίβεια',
+    processStep3: 'Τρίψιμο & έλεγχος λεπτομερειών',
+    processStep4: 'Φινίρισμα (άβαφο/ματ/βαμμένο/σκούρο)',
+    processStep5: 'Τελικός έλεγχος & συσκευασία',
+  },
 
-feature1_en: 'Fonts: Alegreya, Montserrat, Times New Roman',
-feature1_el: 'Γραμματοσειρές: Alegreya, Montserrat, Times New Roman',
+  en: {
+    // Nav / CTAs
+    home: 'Home',
+    order: 'Order',
+    gallery: 'Gallery',
+    about: 'About',
+    ctaOrder: 'Start Your Order',
+    ctaAbout: 'About',
+    ctaFAQ: 'FAQ',
+    learnMore: 'Learn more',
 
-feature2_en: 'Two lines max with live preview',
-feature2_el: 'Μέγιστο δύο γραμμές με ζωντανή προεπισκόπηση',
+    // Hero
+    heroTitle: 'Beautiful Custom Wooden Signs',
+    heroSubtitle:
+      'Pick your text, font, finish, and size. Preview and place your order in minutes.',
+    feature1: 'Fonts: Alegreya, Montserrat, Times New Roman',
+    feature2: 'Live preview, up to 2–3 lines',
+    feature3: 'Multiple finishes and heights',
 
-feature3_en: 'Multiple finishes and heights',
-feature3_el: 'Πολλαπλά φινιρίσματα και ύψη',
+    // Audience block
+    audienceTitle: 'Audience & product ideas',
+    weddingsTitle: 'A. Weddings & Events',
+    weddingsLine1: 'Your names, your style — handmade wooden wedding signs.',
+    weddingsLine2: 'Couple names / “Mr & Mrs” / table signs / candy table',
+    weddingsLine3: 'Phrases for photo booth',
+    bundleLabel: 'Bundle',
+    bundleValue: '1 large word + 2 small table words',
 
-ctaOrder_en: 'Start Your Order',
-ctaOrder_el: 'Ξεκινήστε Παραγγελία',
+    birthdaysTitle: 'B. Birthdays & Parties',
+    birthdaysLine1: 'Kids’ names, age (“Alexis 5”)',
+    birthdaysLine2: 'Themed phrases (“Party Time”, “Happy B-Day”)',
 
-ctaAbout_en: 'About',
-ctaAbout_el: 'Σχετικά',
+    newbornTitle: 'C. Newborn / Kids’ Rooms',
+    newbornLine1: 'Name for wall/door',
+    newbornLine2: 'Set of 3 small words (“Dream • Play • Smile”)',
 
-ctaFAQ_en: 'FAQ',
-ctaFAQ_el: 'Συχνές Ερωτήσεις',
+    educationTitle: 'D. Education / Teachers',
+    educationLine1: 'Small words, big smiles — wooden learning pieces.',
+    educationLine2: 'Alphabet/word games, “Reading Corner”',
+    educationLine3: 'End-of-year teacher gifts (name plaque)',
 
+    customTitle: 'E. Custom Gifts',
+    customLine1: 'Couples, anniversaries, housewarming (“Home”, “Welcome”)',
+    customLine2: 'Business gifts (small logo/brand name)',
+
+    // Process block
+    processTitle: 'How we make it',
+    processSummary:
+      'Every Lexylon piece blends technology with hand craftsmanship. We start from your text, tune the font and height, prepare the cut file, then cut, sand and finish (natural, matte, painted, or dark stain). Each word is quality-checked and carefully packaged.',
+    processStep1: 'Design & font/height selection',
+    processStep2: 'Precision wood cutting',
+    processStep3: 'Sanding & detailing',
+    processStep4: 'Finishing (natural/matte/painted/dark stain)',
+    processStep5: 'Final QA & packaging',
+  },
 };
 
-
 type Ctx = {
-  theme: Theme; toggleTheme: () => void;
-  lang: Lang; toggleLang: () => void;
-  t: (k: BaseKey) => string;
+  lang: Lang;
+  toggleLang: () => void;
+  theme: Theme;
+  toggleTheme: () => void;
+  t: (key: string) => string;
 };
 
 const UIContext = React.createContext<Ctx | null>(null);
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [lang, setLang] = React.useState<Lang>('el');
   const [theme, setTheme] = React.useState<Theme>('dark');
-  const [lang, setLang] = React.useState<Lang>('en');
 
   React.useEffect(() => {
-    const storedTheme = (localStorage.getItem('theme') as Theme) || null;
-    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-    setTheme(storedTheme ?? (prefersDark ? 'dark' : 'light'));
-
-    const storedLang = (localStorage.getItem('lang') as Lang) || 'en';
-    setLang(storedLang);
+    const savedLang = (localStorage.getItem('lang') as Lang) || 'el';
+    const savedTheme = (localStorage.getItem('theme') as Theme) || 'dark';
+    setLang(savedLang);
+    setTheme(savedTheme);
+    document.documentElement.setAttribute('lang', savedLang);
+    document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
 
-  React.useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+  const toggleLang = () => {
+    setLang(prev => {
+      const next = prev === 'el' ? 'en' : 'el';
+      localStorage.setItem('lang', next);
+      document.documentElement.setAttribute('lang', next);
+      return next;
+    });
+  };
 
-  React.useEffect(() => {
-    document.documentElement.lang = lang;
-    localStorage.setItem('lang', lang);
-  }, [lang]);
+  const toggleTheme = () => {
+    setTheme(prev => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
+      document.documentElement.setAttribute('data-theme', next);
+      return next;
+    });
+  };
 
-  const toggleTheme = () => setTheme(p => (p === 'light' ? 'dark' : 'light'));
-  const toggleLang = () => setLang(p => (p === 'en' ? 'el' : 'en'));
-  const t = (k: BaseKey) => dict[`${k}_${lang}`];
+  const t = (key: string) => DICT[lang][key] ?? key;
 
   return (
-    <UIContext.Provider value={{ theme, toggleTheme, lang, toggleLang, t }}>
+    <UIContext.Provider value={{ lang, toggleLang, theme, toggleTheme, t }}>
       {children}
     </UIContext.Provider>
   );
