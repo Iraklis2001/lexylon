@@ -77,9 +77,11 @@ export default function OrderPage() {
       setSuccessId(json.orderId || 'OK');
       // Optional: reset some fields
       // setLines(['']); setEmail('');
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Something went wrong');
-    } finally {
+    } catch (err) {
+  const message = err instanceof Error ? err.message : 'Something went wrong';
+  setErrorMsg(message);
+}
+ finally {
       setSubmitting(false);
     }
   }
@@ -247,7 +249,10 @@ export default function OrderPage() {
             {/* Paint by */}
             <div className="stack">
               <label className="label">{l('paintBy')}</label>
-              <select value={paintBy} onChange={e => setPaintBy(e.target.value as any)}>
+              <select
+  value={paintBy}
+  onChange={e => setPaintBy(e.target.value as 'none' | 'lexylon' | 'customer')}
+>
                 <option value="none">{l('paintByNone')}</option>
                 <option value="lexylon">{l('paintByLexylon')}</option>
                 <option value="customer">{l('paintByCustomer')}</option>
