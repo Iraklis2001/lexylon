@@ -1,75 +1,68 @@
 'use client';
 
 import * as React from 'react';
-import { useUI } from '../../providers';
+import { useOrderDict, OrderSizeId } from '../../providers';
 
-type Status = 'idle' | 'sending' | 'ok' | 'error';
-
-type OrderResponse = { ok?: boolean; orderId?: string; error?: string };
-
-const COLORS = ['Black', 'White', 'Red', 'Green', 'Blue', 'Yellow', 'Orange'] as const;
-type Color = (typeof COLORS)[number];
-
-type PainterKey = 'woodmaster' | 'designx' | 'toxicw';
-const PAINTERS: Record<PainterKey, { label: string; price: number }> = {
-  woodmaster: { label: 'Woodmaster — Xenios Charampus', price: 5 },
-  designx: { label: 'Design X', price: 10 },
-  toxicw: { label: 'Toxicw', price: 15 },
-};
+type Finish = 'unpainted' | 'painted';
 
 export default function OrderPage() {
-  const { lang } = useUI();
-  const isEl = lang === 'el';
+  const { l, sizes, colors } = useOrderDict();
 
-  const [status, setStatus] = React.useState<Status>('idle');
-  const [msg, setMsg] = React.useState('');
-
+  // form state
   const [lines, setLines] = React.useState<string[]>(['']);
-  const [size, setSize] = React.useState<'A5' | 'A4' | 'A3'>('A4');
+  const [size, setSize] = React.useState<OrderSizeId>('A4');
+  const [finish, setFinish] = React.useState<Finish>('painted');
+  const [color, setColor] = React.useState(colors[0].hex);
+  const [paintBy, setPaintBy] = React.useState<'none' | 'lexylon' | 'customer'>('none');
+  const [email, setEmail] = React.useState('');
 
-  const [finish, setFinish] = React.useState<'unpainted' | 'painted'>('unpainted');
-  const [color, setColor] = React.useState<Color | ''>('');
-  const [painter, setPainter] = React.useState<PainterKey | ''>('');
+  // submit state
+  const [submitting, setSubmitting] = React.useState(false);
+  const [successId, setSuccessId] = React.useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
-  const letterCount = lines.join('').replace(/\s/g, '').length;
-  const surcharge = finish === 'painted' && painter ? PAINTERS[painter].price : 0;
+  const letters = React.useMemo(
+    () => lines.join('').replace(/\s+/g, '').length,
+    [lines]
+  );
 
-  const addLine = () => {
-    if (lines.length < 3) setLines(prev => [...prev, '']);
-  };
+  const painted = finish === 'painted';
+  const chosenColor = React.useMemo(
+    () => colors.find(c => c.hex === color) ?? colors[0],
+    [color, colors]
+  );
 
-  const removeLine = (i: number) => {
-    if (lines.length <= 1) return;
-    const copy = [...lines];
-    copy.splice(i, 1);
-    setLines(copy);
-  };
+  function updateLine(idx: number, value: string) {
+    setLines(prev => {
+      const next = [...prev];
+      next[idx] = value;
+      return next;
+    });
+  }
+  function addLine() {
+    setLines(prev => (prev.length >= 3 ? prev : [...prev, '']));
+  }
+  function removeLine(idx: number) {
+    setLines(prev => prev.filter((_, i) => i !== idx));
+  }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setStatus('sending');
-    setMsg('');
+    setSubmitting(true);
+    setSuccessId(null);
+    setErrorMsg(null);
 
-    const form = e.currentTarget;
-    const email = (form.elements.namedItem('email') as HTMLInputElement)?.value || '';
-    const notes = (form.elements.namedItem('notes') as HTMLTextAreaElement)?.value || '';
-
-    // Basic validation: if painted, color is required.
-    if (finish === 'painted' && !color) {
-      setStatus('error');
-      setMsg(isEl ? 'Επιλέξτε χρώμα βαφής.' : 'Please choose a paint color.');
-      return;
-    }
+    const colorObj = painted ? { name: chosenColor.name, hex: chosenColor.hex } : null;
 
     const payload = {
-      lines,
-      size,                              // A5 / A4 / A3
-      finish: finish === 'painted' ? `paint:${color}` : 'unpainted',
-      painter: painter || null,          // woodmaster / designx / toxicw
-      paintSurchargeEUR: surcharge,      // 0, 5, 10, 15
+      lines: lines.filter(Boolean),
+      size,
+      finish,
+      color: colorObj,                  // null if unpainted
+      paintBy,                          // 'none' | 'lexylon' | 'customer'
       email,
-      notes,
-      letterCount,
+      notes: '',                        // add a textarea if you want to collect notes
+      letterCount: letters,
     };
 
     try {
@@ -78,223 +71,298 @@ export default function OrderPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data: OrderResponse = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Submit failed');
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || 'Failed to send');
 
-      setStatus('ok');
-      setMsg(
-        isEl
-          ? `Ευχαριστούμε! Ο κωδικός παραγγελίας σας είναι ${data.orderId}.`
-          : `Thanks! Your order ID is ${data.orderId}.`
-      );
-
-      // Reset
-      setLines(['']);
-      setSize('A4');
-      setFinish('unpainted');
-      setColor('');
-      setPainter('');
-      form.reset();
-    } catch (err) {
-      setStatus('error');
-      setMsg(err instanceof Error ? err.message : isEl ? 'Κάτι πήγε στραβά.' : 'Something went wrong.');
+      setSuccessId(json.orderId || 'OK');
+      // Optional: reset some fields
+      // setLines(['']); setEmail('');
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Something went wrong');
+    } finally {
+      setSubmitting(false);
     }
   }
 
   return (
-    <main className="container narrow">
-      {/* Title */}
-      <h1 className="pageTitle brand">
-        {isEl ? 'Παραγγελία' : 'Order'}
-      </h1>
+    <section className="orderBg">
+      <div className="orderCanvas">
+        <div className="orderPanel">
+          {/* Title */}
+          <header className="head">
+            <h1 className="pageTitle brand">{l('orderTitle')}</h1>
+            <p className="muted">{l('orderSubtitle')}</p>
+          </header>
 
-      {/* Preview (fixed size; apply color if painted) */}
-      <section
-        className="glassCard accentBorder"
-        style={{ maxWidth: 820, margin: '0 auto 18px', textAlign: 'center' }}
-      >
-        <div
-          style={{
-            fontFamily: "'Alegreya', serif",
-            fontSize: 48,          // fixed preview size (no dynamic scaling)
-            lineHeight: 1.12,
-            display: 'grid',
-            gap: 6,
-            padding: '10px 8px',
-            minHeight: 80,
-            color: finish === 'painted' && color ? '#fff' : 'inherit',
-            // For painted preview, tint the background to the chosen color so the words "look painted"
-            background:
-              finish === 'painted' && color
-                ? color.toLowerCase()
-                : 'transparent',
-            borderRadius: 12,
-          }}
-          aria-live="polite"
-          title={isEl ? 'Ζωντανή προεπισκόπηση' : 'Live preview'}
-        >
-          {lines.length ? lines.map((t, i) => <div key={i}>{t || ' '}</div>) : (isEl ? 'Το κείμενό σας εδώ' : 'Your text here')}
-        </div>
+          {/* Pills / summary */}
+          <section className="glassCard accentBorder pills">
+            <span className="pill">{l('pillSize')}: {size}</span>
+            <span className="pill">
+              {l('pillFinish')}: {painted ? l('painted') : l('unpainted')}
+            </span>
+            <span className="pill">{l('pillLetters')}: {letters}</span>
+          </section>
 
-        {/* quick facts under preview */}
-        <ul className="featureBadges" style={{ justifyContent: 'center' }}>
-          <li>{isEl ? 'Μέγεθος' : 'Size'}: {size}</li>
-          <li>
-            {isEl ? 'Φινίρισμα' : 'Finish'}:{' '}
-            {finish === 'unpainted'
-              ? (isEl ? 'Άβαφο' : 'Unpainted')
-              : `${isEl ? 'Βαφή' : 'Painted'}${color ? ` — ${color}` : ''}`}
-          </li>
-          <li>{isEl ? 'Σύνολο γραμμάτων' : 'Total letters'}: {letterCount}</li>
-        </ul>
-      </section>
-
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="glassCard accentBorder" style={{ maxWidth: 820, margin: '0 auto' }}>
-        <div className="stack">
-
-          {/* Lines */}
-          {lines.map((value, i) => (
-            <div key={i} className="stack">
-              <label>{isEl ? 'Γραμμή' : 'Line'} {i + 1}</label>
-              <div className="row">
-                <input
-                  className="w100"
-                  name={`line${i + 1}`}
-                  value={value}
-                  onChange={(e) => {
-                    const copy = [...lines];
-                    copy[i] = e.target.value;
-                    setLines(copy);
-                  }}
-                  placeholder={isEl ? 'Το κείμενό σας εδώ' : 'Your text here'}
-                  required={i === 0}
-                />
-                {lines.length > 1 && (
-                  <button type="button" className="button ghost xl" onClick={() => removeLine(i)}>
-                    {isEl ? 'Αφαίρεση' : 'Remove'}
-                  </button>
+          {/* Preview */}
+          <section className="glassCard">
+            <h2 className="h2">{l('preview')}</h2>
+            <div
+              className="preview"
+              style={{
+                background: painted ? chosenColor.hex : '#f3efea',
+                color: painted
+                  ? (chosenColor.hex.toLowerCase() === '#ffffff' ? '#111' : '#fff')
+                  : '#1b1209',
+                borderColor: painted ? 'transparent' : '#dfd7cc',
+              }}
+            >
+              <div className="previewInner">
+                {lines.map((text, i) => (
+                  <div key={i} className={`line ${i === 0 ? 'first' : ''}`}>
+                    {text || <span className="ghost">{l('yourTextHere')}</span>}
+                  </div>
+                ))}
+                {lines.length === 0 && (
+                  <div className="line first"><span className="ghost">{l('yourTextHere')}</span></div>
                 )}
               </div>
             </div>
-          ))}
 
-          <div className="row">
-            <button
-              type="button"
-              className="button ghost xl"
-              onClick={addLine}
-              disabled={lines.length >= 3}
-              title={lines.length >= 3 ? '(max 3)' : undefined}
-            >
-              {isEl ? 'Προσθήκη γραμμής' : 'Add line'}
-            </button>
-          </div>
+            <ul className="featureBadges">
+              <li>{l('featureFonts')}</li>
+              <li>{l('featureProof')}</li>
+              <li>{l('featurePackaging')}</li>
+            </ul>
+          </section>
 
-          {/* Size (A5/A4/A3) */}
-          <div className="stack">
-            <label>{isEl ? 'Μέγεθος' : 'Size'}</label>
-            <select name="size" value={size} onChange={(e) => setSize(e.target.value as 'A5'|'A4'|'A3')}>
-              <option value="A5">A5</option>
-              <option value="A4">A4</option>
-              <option value="A3">A3</option>
-            </select>
-          </div>
+          {/* FORM */}
+          <form className="glassCard" onSubmit={handleSubmit}>
+            <h2 className="h2">{l('details')}</h2>
 
-          {/* Finish: Unpainted or Painted */}
-          <div className="stack">
-            <label>{isEl ? 'Φινίρισμα' : 'Finish'}</label>
+            {/* Lines */}
+            {lines.map((val, i) => (
+              <div className="stack" key={i}>
+                <label className="label">{l('line')} {i + 1}</label>
+                <div className="row">
+                  <input
+                    className="w100"
+                    value={val}
+                    onChange={e => updateLine(i, e.target.value)}
+                    placeholder={l('yourTextHere')}
+                    maxLength={32}
+                  />
+                  {i > 0 && (
+                    <button
+                      className="button ghost"
+                      type="button"
+                      onClick={() => removeLine(i)}
+                      title={l('remove')}
+                    >
+                      {l('remove')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
             <div className="row">
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input
-                  type="radio"
-                  name="finish"
-                  value="unpainted"
-                  checked={finish === 'unpainted'}
-                  onChange={() => { setFinish('unpainted'); setColor(''); setPainter(''); }}
-                />
-                {isEl ? 'Άβαφο' : 'Unpainted'}
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input
-                  type="radio"
-                  name="finish"
-                  value="painted"
-                  checked={finish === 'painted'}
-                  onChange={() => setFinish('painted')}
-                />
-                {isEl ? 'Βαφή' : 'Painted'}
-              </label>
-            </div>
-          </div>
-
-          {/* Color (only if Painted) */}
-          {finish === 'painted' && (
-            <div className="stack">
-              <label>{isEl ? 'Χρώμα' : 'Color'}</label>
-              <select
-                name="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value as Color)}
-                required
+              <button
+                className="button ghost"
+                type="button"
+                onClick={addLine}
+                disabled={lines.length >= 3}
+                title={l('addLine')}
               >
-                <option value="">{isEl ? 'Επιλέξτε χρώμα' : 'Choose a color'}</option>
-                {COLORS.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+                {l('addLine')}
+              </button>
             </div>
-          )}
 
-          {/* Painter (only if Painted) */}
-          {finish === 'painted' && (
+            {/* Size */}
             <div className="stack">
-              <label>{isEl ? 'Βαφή από' : 'Paint by'}</label>
-              <select
-                name="painter"
-                value={painter}
-                onChange={(e) => setPainter(e.target.value as PainterKey)}
-              >
-                <option value="">{isEl ? 'Χωρίς προτίμηση' : 'No preference'}</option>
-                {Object.entries(PAINTERS).map(([key, p]) => (
-                  <option key={key} value={key}>
-                    {p.label} (+€{p.price})
+              <label className="label">{l('sizeLabel')}</label>
+              <select value={size} onChange={e => setSize(e.target.value as OrderSizeId)}>
+                {sizes.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.label} — {s.note}
                   </option>
                 ))}
               </select>
             </div>
-          )}
 
-          {/* Email */}
-          <div className="stack">
-            <label>{isEl ? 'Email επιβεβαίωσης' : 'Confirmation email'}</label>
-            <input type="email" name="email" required placeholder="you@email.com" />
-          </div>
+            {/* Finish */}
+            <div className="stack">
+              <label className="label">{l('finishLabel')}</label>
+              <div className="row">
+                <label className="row">
+                  <input
+                    type="radio"
+                    name="finish"
+                    checked={finish === 'unpainted'}
+                    onChange={() => setFinish('unpainted')}
+                  />
+                  <span>{l('unpainted')}</span>
+                </label>
+                <label className="row">
+                  <input
+                    type="radio"
+                    name="finish"
+                    checked={finish === 'painted'}
+                    onChange={() => setFinish('painted')}
+                  />
+                  <span>{l('painted')}</span>
+                </label>
+              </div>
+            </div>
 
-          {/* Notes */}
-          <div className="stack">
-            <label>{isEl ? 'Σημειώσεις' : 'Notes'}</label>
-            <textarea name="notes" rows={3} placeholder={isEl ? 'Προθεσμία, ειδικές οδηγίες…' : 'Deadline, special instructions…'} />
-          </div>
+            {/* Color (only if painted) */}
+            {painted && (
+              <div className="stack">
+                <label className="label">{l('colorLabel')}</label>
+                <select
+                  value={color}
+                  onChange={e => setColor(e.target.value)}
+                  aria-label={l('chooseColor')}
+                >
+                  {colors.map(c => (
+                    <option key={c.hex} value={c.hex}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="swatchRow">
+                  {colors.map(c => (
+                    <button
+                      type="button"
+                      key={c.hex}
+                      aria-label={c.name}
+                      title={c.name}
+                      className={`swatch ${c.hex === color ? 'isActive' : ''}`}
+                      style={{ background: c.hex }}
+                      onClick={() => setColor(c.hex)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
-          {/* Submit */}
-          <button type="submit" className="button ghost xl" style={{ width: '100%' }}>
-            {isEl ? 'Υποβολή Παραγγελίας' : 'Submit Order'}
-          </button>
+            {/* Paint by */}
+            <div className="stack">
+              <label className="label">{l('paintBy')}</label>
+              <select value={paintBy} onChange={e => setPaintBy(e.target.value as any)}>
+                <option value="none">{l('paintByNone')}</option>
+                <option value="lexylon">{l('paintByLexylon')}</option>
+                <option value="customer">{l('paintByCustomer')}</option>
+              </select>
+            </div>
 
-          {/* status */}
-          {status !== 'idle' && (
-            <p className={status === 'error' ? 'error' : 'success'} style={{ marginTop: 6 }}>
-              {msg}
-            </p>
-          )}
+            {/* Email */}
+            <div className="stack">
+              <label className="label">{l('emailLabel')}</label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+              <p className="footnote">{l('emailFootnote')}</p>
+            </div>
 
-          {/* Footnote with * prices */}
-          <p className="footnote">
-            * {isEl ? 'Χρεώσεις βαφής' : 'Painting surcharges'}:
-            {' '}Woodmaster — Xenios Charampus €5, Design X €10, Toxicw €15.
-            {' '}{isEl ? 'Τα παραπάνω προστίθενται μόνο όταν επιλεγεί βαφή.' : 'Applied only when “Painted” is selected.'}
-          </p>
+            {/* Status + Submit */}
+            {errorMsg && <p className="error">{errorMsg}</p>}
+            {successId && (
+              <p className="success">
+                Order sent! ID: <b>{successId}</b>. Check your email for confirmation.
+              </p>
+            )}
+            <div className="row">
+              <button className="button ghost xl" type="submit" disabled={submitting}>
+                {submitting ? 'Sending…' : l('sendRequest')}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
-    </main>
+      </div>
+
+      {/* Page styles */}
+      <style jsx>{`
+        .head{ margin-bottom: .75rem; }
+        .h2{ margin: 0 0 .75rem; font-weight: 800; }
+        .label{ font-weight: 700; }
+
+        .pills{ display:flex; gap:.5rem; flex-wrap:wrap; }
+        .pill{
+          display:inline-flex; align-items:center; height:2rem;
+          padding: 0 .7rem; border-radius: 999px;
+          background: rgba(255,255,255,.06);
+          border: 1px solid var(--border);
+          font-weight: 700;
+        }
+
+        .preview{
+          border: 1px solid; border-radius: calc(var(--radius) - 8px);
+          min-height: 220px; display: grid; place-items: center;
+          box-shadow: inset 0 8px 40px rgba(0,0,0,.15);
+        }
+        .previewInner{ width: min(90%, 720px); text-align: center; }
+        .line{
+          font-family: "Lobster Two", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+          font-weight: 700; letter-spacing: .02em;
+          font-size: clamp(1.8rem, 1.2rem + 3.2vw, 3rem);
+          line-height: 1.05; text-shadow: 0 2px 10px rgba(0,0,0,.18);
+          margin: .25rem 0;
+        }
+        .line.first{ font-size: clamp(2rem, 1.4rem + 3.8vw, 3.3rem); }
+        .ghost{ opacity: .55; }
+
+        .swatchRow{ display:flex; flex-wrap:wrap; gap: .5rem; }
+        .swatch{
+          width: 26px; height: 26px; border-radius: 999px;
+          border: 2px solid #fff; outline: 1px solid rgba(0,0,0,.2);
+          box-shadow: 0 2px 10px rgba(0,0,0,.15);
+        }
+        .swatch.isActive{ outline: 3px solid rgba(219,138,43,.5); }
+
+        /* Centered paper panel */
+        .orderBg{ padding: 2.5rem 0 3.5rem; }
+        .orderCanvas{ width: min(1100px, 100% - 2rem); margin-inline: auto; }
+        .orderPanel{
+          background: #f7f5f1 url('/topo-light.svg') repeat;
+          background-size: 900px;
+          color: #1b1209;
+          border: 1px solid rgba(0,0,0,.06);
+          border-radius: 1.25rem;
+          box-shadow: 0 26px 70px rgba(0,0,0,.28);
+          padding: clamp(1rem, 2vw + 1rem, 2rem);
+        }
+        .glassCard{
+          background: #fff; color: #111; border: 1px solid #ece8e2;
+          border-radius: 1.25rem; box-shadow: 0 12px 32px rgba(0,0,0,.08);
+          padding: 1.25rem; margin: 0 auto 1rem; max-width: 820px;
+        }
+
+        /* Inputs/buttons */
+        .row{ display:flex; gap:.6rem; align-items:center; flex-wrap: wrap; }
+        .stack{ display:grid; gap:.4rem; margin-bottom: .75rem; }
+        input, select, textarea{
+          width: 100%; padding: .7rem .9rem; border-radius: .75rem;
+          border: 1px solid #e8e4de; background: #fff; color: #111; outline: none;
+          transition: box-shadow .15s ease, border-color .15s ease;
+        }
+        input:focus-visible, select:focus-visible, textarea:focus-visible{
+          border-color: #d9d3ca; box-shadow: 0 0 0 6px rgba(219,138,43,.18);
+        }
+        .button{
+          display:inline-flex; align-items:center; justify-content:center;
+          gap:.45rem; height:2.8rem; padding:0 1rem; border-radius: .9rem; font-weight:700;
+          background: var(--brand); color: var(--brand-contrast); border: 1px solid transparent;
+        }
+        .button.ghost:hover{ filter: brightness(1.05); }
+        .button.xl{ height: 3rem; padding: 0 1.1rem; }
+
+        .success{ color:#26c281; }
+        .error{ color:#ff6b6b; }
+        .footnote{ color:#6b6b6b; font-size:.92rem; }
+      `}</style>
+    </section>
   );
 }

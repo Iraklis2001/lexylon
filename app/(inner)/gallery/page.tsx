@@ -1,104 +1,186 @@
-// app/gallery/page.tsx
 'use client';
 
 import Image from 'next/image';
 import * as React from 'react';
 import { useUI } from '../../providers';
 
-const IMAGES = [
-  '/gallery/01.jpg',
-  '/gallery/02.jpg',
-  '/gallery/03.jpg',
-  '/gallery/04.jpg',
-  '/gallery/05.jpg',
-  '/gallery/06.jpg',
-  '/gallery/08.jpg',
-  '/gallery/07.jpg',
+type Work = { src: string; title?: string };
+type Artist = {
+  id: string;
+  nameEl: string;
+  nameEn: string;
+  bioEl?: string;
+  bioEn?: string;
+  works: Work[];
+};
+
+// ====== configure your artists & images ======
+const ARTISTS: Artist[] = [
+  {
+    id: 'design-x',
+    nameEl: 'DESIGN X',
+    nameEn: 'DESIGN X',
+    bioEl: 'Γραμμικά, καθαρά σχέδια – custom αριθμοί & πινακίδες.',
+    bioEn: 'Linear, clean designs—custom numbers & plaques.',
+    works: [
+      { src: '/gallery/designx/01.jpg',},
+      { src: '/gallery/designx/02.jpg',},
+      { src: '/gallery/designx/03.jpg',},
+      { src: '/gallery/designx/04.jpg',},
+      { src: '/gallery/designx/04.jpg',},
+      { src: '/gallery/designx/05.jpg',},
+      { src: '/gallery/designx/06.jpg',},
+      { src: '/gallery/designx/07.jpg',},
+      { src: '/gallery/designx/09.jpg',},
+      { src: '/gallery/designx/10.jpg',},
+      { src: '/gallery/designx/11.jpg',},
+    ],
+  },
+  {
+    id: 'toxicc',
+    nameEl: 'TOXIC C',
+    nameEn: 'TOXIC C',
+    bioEl: 'Έντονα χρώματα & playful lettering.',
+    bioEn: 'Bold colors & playful lettering.',
+    works: [
+      { src: '/gallery/toxicc/01.jpg',},
+      { src: '/gallery/toxicc/02.jpg',},
+      { src: '/gallery/toxicc/03.jpg',},
+      { src: '/gallery/toxicc/04.jpg',},
+    ],
+  },
+  {
+    id: 'xenios',
+    nameEl: 'Xenios Charalampous',
+    nameEn: 'Xenios Charalampous',
+    bioEl: 'Χειροποίητες λεπτομέρειες, ιδιαίτερα φινιρίσματα.',
+    bioEn: 'Handcrafted detail, refined finishes.',
+    works: [
+      { src: '/gallery/xenios/01.jpg',},
+      { src: '/gallery/xenios/02.jpg',},
+      { src: '/gallery/xenios/03.jpg',},
+      { src: '/gallery/xenios/04.jpg',},
+      { src: '/gallery/xenios/05.jpg',},
+      { src: '/gallery/xenios/06.jpg',},
+      { src: '/gallery/xenios/07.jpg',},
+      { src: '/gallery/xenios/08.jpg',},
+      { src: '/gallery/xenios/09.jpg',},
+      { src: '/gallery/xenios/10.jpg',},
+    ],
+  },
 ];
 
-export default function Gallery() {
-  const { lang } = useUI();
-  const isEl = lang === 'el';
+// simple lightbox helper
+function useLightbox() {
+  const [open, setOpen] = React.useState(false);
+  const [items, setItems] = React.useState<Work[]>([]);
+  const [idx, setIdx] = React.useState(0);
 
-  const [active, setActive] = React.useState<string | null>(null);
+  const show = (list: Work[], start: number) => {
+    setItems(list);
+    setIdx(start);
+    setOpen(true);
+  };
+  const close = () => setOpen(false);
+  const next = () => setIdx(i => (i + 1) % items.length);
+  const prev = () => setIdx(i => (i - 1 + items.length) % items.length);
 
-  // Close lightbox with ESC
   React.useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setActive(null);
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'ArrowLeft') prev();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [open, items.length]);
+
+  return { open, items, idx, show, close, next, prev };
+}
+
+export default function GalleryByArtist() {
+  const { lang } = useUI();
+  const isEl = lang === 'el';
+  const [filter, setFilter] = React.useState<'all' | string>('all');
+  const { open, items, idx, show, close, next, prev } = useLightbox();
+
+  const visible = filter === 'all' ? ARTISTS : ARTISTS.filter(a => a.id === filter);
 
   return (
-    <main className="container">
-      <h1 className="pageTitle brand">{isEl ? 'Γκαλερί' : 'Gallery'}</h1>
+    // Pick ONE background class here:
+    // galleryBg--topo  OR  galleryBg--warm  OR  galleryBg--wood
+    <section className="galleryBg galleryBg--topo">
+      <main className="container galleryPage">
+        <h1 className="pageTitle brand">{isEl ? 'Γκαλερί' : 'Gallery'}</h1>
 
-      <section className="glassCard accentBorder" style={{ padding: 16 }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-            gap: 16,
-          }}
-        >
-          {IMAGES.map((src, i) => (
-            <figure
-              key={src}
-              className="card compact"
-              style={{
-                padding: 8,
-                cursor: 'zoom-in',
-                transition: 'transform .15s ease',
-              }}
-              onClick={() => setActive(src)}
+        {/* Filter pills (sticky) */}
+        <div className="galleryFilters">
+          <button
+            className={`pill ${filter === 'all' ? 'is-active' : ''}`}
+            onClick={() => setFilter('all')}
+          >
+            {isEl ? 'Όλοι οι Καλλιτέχνες' : 'All Artists'}
+          </button>
+          {ARTISTS.map(a => (
+            <button
+              key={a.id}
+              className={`pill ${filter === a.id ? 'is-active' : ''}`}
+              onClick={() => setFilter(a.id)}
             >
-              <Image
-                src={src}
-                alt={`${isEl ? 'Φωτογραφία' : 'Photo'} ${i + 1}`}
-                width={1000}
-                height={750}
-                style={{ width: '100%', height: 'auto', borderRadius: 10 }}
-                loading="lazy"
-              />
-            </figure>
+              {isEl ? a.nameEl : a.nameEn}
+            </button>
           ))}
         </div>
 
-        <p className="footnote" style={{ marginTop: 10 }}>
-          {isEl ? 'Κλικ για μεγέθυνση.' : 'Click an image to enlarge.'}
-        </p>
-      </section>
+        {visible.map(a => (
+          <section key={a.id} className="artistSection">
+            <header className="artistHeader">
+              <h2 className="artistName">{isEl ? a.nameEl : a.nameEn}</h2>
+              {(a.bioEl || a.bioEn) && (
+                <p className="artistBio muted">{isEl ? a.bioEl : a.bioEn}</p>
+              )}
+            </header>
 
-      {/* Lightbox */}
-      {active && (
-        <div
-          onClick={() => setActive(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,.75)',
-            display: 'grid',
-            placeItems: 'center',
-            zIndex: 50,
-            cursor: 'zoom-out',
-            padding: 12,
-          }}
-          aria-label={isEl ? 'Μεγάλη προβολή εικόνας' : 'Lightbox'}
-        >
-          {/* Use <img> here so Next/Image doesn’t constrain layout in overlay */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={active}
-            alt="Preview"
-            style={{
-              maxWidth: '92vw',
-              maxHeight: '92vh',
-              borderRadius: 12,
-              boxShadow: '0 20px 50px rgba(0,0,0,.5)',
-            }}
-          />
-        </div>
-      )}
-    </main>
+            <div className="worksGrid">
+              {a.works.map((w, i) => (
+                <button
+                  key={`${a.id}-${i}`}
+                  className="thumb"
+                  onClick={() => show(a.works, i)}
+                  aria-label={(w.title || 'Artwork') + ' – open'}
+                >
+                  <span className="thumbImg">
+                    <Image
+                      src={w.src}
+                      alt={w.title || 'Artwork'}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="thumbImgEl"
+                    />
+                  </span>
+                  {w.title && <span className="thumbCap">{w.title}</span>}
+                </button>
+              ))}
+            </div>
+
+            <p className="footnote muted">
+              {isEl ? 'Κλικ σε εικόνα για μεγέθυνση.' : 'Click an image to enlarge.'}
+            </p>
+          </section>
+        ))}
+
+        {/* Lightbox */}
+        {open && items[idx] && (
+          <div className="lb" role="dialog" aria-modal="true" onClick={close}>
+            <button className="lbBtn left" onClick={(e) => (e.stopPropagation(), prev())} aria-label="Previous">‹</button>
+            <button className="lbBtn right" onClick={(e) => (e.stopPropagation(), next())} aria-label="Next">›</button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={items[idx].src} alt={items[idx].title || 'Artwork'} className="lbImg" onClick={(e) => e.stopPropagation()} />
+            {items[idx].title && <div className="lbCap">{items[idx].title}</div>}
+          </div>
+        )}
+      </main>
+    </section>
   );
 }
