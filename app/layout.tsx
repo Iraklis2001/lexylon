@@ -25,7 +25,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <Header />
           {children}
-          <footer className="foot">© {new Date().getFullYear()} Lexylon · Made in Cyprus</footer>
+          <footer className="siteFooter">
+  <div className="siteFooter__inner">
+
+{/* Right: spacer (keeps the center perfectly centered) */}
+    <div className="siteFooter__spacer" />
+  </div>
+  
+    {/* Center: copyright */}
+    <div className="siteFooter__copy">
+      © {new Date().getFullYear()} Lexylon · Made in Cyprus
+    </div>
+
+    
+</footer>
         </Providers>
       </body>
     </html>

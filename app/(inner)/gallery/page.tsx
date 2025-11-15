@@ -51,8 +51,8 @@ const ARTISTS: Artist[] = [
   },
   {
     id: 'xenios',
-    nameEl: 'Xenios Charalampous',
-    nameEn: 'Xenios Charalampous',
+    nameEl: 'UNIQUE',
+    nameEn: 'UNIQUE',
     bioEl: 'Χειροποίητες λεπτομέρειες, ιδιαίτερα φινιρίσματα.',
     bioEn: 'Handcrafted detail, refined finishes.',
     works: [

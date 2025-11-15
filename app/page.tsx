@@ -7,8 +7,8 @@ import { useUI } from './providers';
 
 // Put your images in /public/slides (e.g. 1.jpg, 2.jpg, 3.jpg, ...).
 const SLIDES = ['/slides/01.jpg', '/slides/02.jpg', '/slides/03.jpg', '/slides/04.jpg', '/slides/05.jpg']; // add more if you like
-const DURATION = 6000; // ms between slides
-const FADE_MS = 1200;  // must match CSS transition
+const DURATION = 3000; // ms between slides
+const FADE_MS = 900;  // must match CSS transition
 
 export default function Home() {
   const { t } = useUI();

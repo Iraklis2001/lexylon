@@ -1034,3 +1034,180 @@ input[type="radio"], input[type="checkbox"]{ transform: translateY(1px); }
 @media (max-width: 560px){
   .orderPanel .button.xl{ width: 100%; }
 }
+
+/* ===== Footer bar (matches navbar) ===== */
+.siteFooter{
+  position: relative;            /* not fixed (doesn’t cover content) */
+  margin-top: 32px;
+  background: rgba(18,18,19,.55);
+  border-top: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 -10px 25px rgba(0,0,0,.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--text);
+}
+
+.siteFooter__inner{
+  height: 64px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;  /* left brand | centered copy | right spacer */
+  align-items: center;
+  width: min(1120px, 100% - 2rem);
+  margin-inline: auto;
+}
+
+.siteFooter .brand a{
+  font-family: "Lobster Two", cursive;  /* same as header */
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: .02em;
+  color: #fff;
+  opacity: .9;
+}
+
+.siteFooter__copy{
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: .01em;
+  opacity: .95;
+}
+
+.siteFooter__spacer{ justify-self: end; }
+
+/* Smaller screens: tighten up */
+@media (max-width: 720px){
+  .siteFooter__inner{ height: 58px; }
+  .siteFooter .brand a{ font-size: 1.15rem; }
+  .siteFooter__copy{ font-weight: 600; }
+}
+
+/* Price Estimate Box */
+.priceBox {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid #e6e1da;
+  border-radius: 1rem;
+  padding: 1rem 1.2rem;
+  margin-top: 1.2rem;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  backdrop-filter: blur(6px);
+}
+
+.priceTitle {
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin-bottom: 0.6rem;
+  color: #1b1209;
+}
+
+.priceMuted {
+  color: #777;
+  font-size: 0.95rem;
+}
+
+.priceLine {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.priceLine span {
+  font-weight: 600;
+}
+
+.priceTotalRow {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.7rem;
+  border-top: 1px solid #ddd;
+  padding-top: 0.6rem;
+  font-size: 1.1rem;
+}
+
+.priceTotal {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+/* Price Estimate Box */
+.priceBox {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem 1.1rem;
+  margin-top: 1.2rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  border: 1px solid #eee3d7;
+}
+
+.priceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-bottom: .4rem;
+}
+
+.priceTitle {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #1b1209;
+}
+
+.priceTag {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(219,138,43,0.12);
+  color: #b26b1f;
+}
+
+.priceMuted {
+  color: #8a8a8a;
+  font-size: 0.93rem;
+  margin-top: 0.25rem;
+}
+
+.priceRows {
+  margin-top: 0.35rem;
+}
+
+.priceLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: .75rem;
+  font-size: 0.92rem;
+  color: #434343;
+  padding: 0.15rem 0;
+}
+
+.priceValue {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.priceDivider {
+  border-top: 1px solid #e4ded5;
+  margin: 0.45rem 0 0.5rem;
+}
+
+.priceTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 1rem;
+}
+
+.priceTotalRow span:first-of-type {
+  font-weight: 600;
+}
+
+.priceTotal {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--brand);
+  font-variant-numeric: tabular-nums;
+}

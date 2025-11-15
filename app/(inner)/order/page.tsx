@@ -4,16 +4,17 @@ import * as React from 'react';
 import { useOrderDict, OrderSizeId } from '../../providers';
 
 type Finish = 'unpainted' | 'painted';
+type PaintBy = 'Unique' | 'Toxic C' | 'Design X';
 
 export default function OrderPage() {
-  const { l, sizes, colors } = useOrderDict();
+  const { l, sizes, colors, lang } = useOrderDict();
 
   // form state
   const [lines, setLines] = React.useState<string[]>(['']);
   const [size, setSize] = React.useState<OrderSizeId>('A4');
   const [finish, setFinish] = React.useState<Finish>('painted');
   const [color, setColor] = React.useState(colors[0].hex);
-  const [paintBy, setPaintBy] = React.useState<'none' | 'lexylon' | 'customer'>('none');
+  const [paintBy, setPaintBy] = React.useState<PaintBy>('Unique');
   const [email, setEmail] = React.useState('');
 
   // submit state
@@ -21,6 +22,7 @@ export default function OrderPage() {
   const [successId, setSuccessId] = React.useState<string | null>(null);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
+  // letters (no spaces)
   const letters = React.useMemo(
     () => lines.join('').replace(/\s+/g, '').length,
     [lines]
@@ -32,6 +34,15 @@ export default function OrderPage() {
     [color, colors]
   );
 
+  // 🔢 price calculation
+  const price = React.useMemo(() => {
+    if (letters === 0) return 0;
+    const extraLetters = Math.max(letters - 5, 0);
+    return 15 + extraLetters * 3;
+  }, [letters]);
+
+  const extraLetters = Math.max(letters - 5, 0);
+
   function updateLine(idx: number, value: string) {
     setLines(prev => {
       const next = [...prev];
@@ -39,9 +50,11 @@ export default function OrderPage() {
       return next;
     });
   }
+
   function addLine() {
     setLines(prev => (prev.length >= 3 ? prev : [...prev, '']));
   }
+
   function removeLine(idx: number) {
     setLines(prev => prev.filter((_, i) => i !== idx));
   }
@@ -58,11 +71,12 @@ export default function OrderPage() {
       lines: lines.filter(Boolean),
       size,
       finish,
-      color: colorObj,                  // null if unpainted
-      paintBy,                          // 'none' | 'lexylon' | 'customer'
+      color: colorObj,          // null if unpainted
+      paintBy,                  // 'Unique' | 'Toxic C' | 'Design X'
       email,
-      notes: '',                        // add a textarea if you want to collect notes
+      notes: '',
       letterCount: letters,
+      priceEuro: price,         // 🔥 send calculated price as well
     };
 
     try {
@@ -75,13 +89,12 @@ export default function OrderPage() {
       if (!res.ok) throw new Error(json?.error || 'Failed to send');
 
       setSuccessId(json.orderId || 'OK');
-      // Optional: reset some fields
+      // Optional reset:
       // setLines(['']); setEmail('');
     } catch (err) {
-  const message = err instanceof Error ? err.message : 'Something went wrong';
-  setErrorMsg(message);
-}
- finally {
+      const message = err instanceof Error ? err.message : 'Something went wrong';
+      setErrorMsg(message);
+    } finally {
       setSubmitting(false);
     }
   }
@@ -105,6 +118,20 @@ export default function OrderPage() {
             <span className="pill">{l('pillLetters')}: {letters}</span>
           </section>
 
+          {/* Sizes & prices info */}
+          <section className="glassCard accentBorder">
+            <h2 className="h2">{l('sizePriceTitle')}</h2>
+            <p className="muted">
+              {l('sizeLine')}
+            </p>
+            <p className="muted">
+              {l('priceLine')}
+            </p>
+            <p className="footnote">
+              {l('kidsFootnote')}
+            </p>
+          </section>
+
           {/* Preview */}
           <section className="glassCard">
             <h2 className="h2">{l('preview')}</h2>
@@ -125,7 +152,9 @@ export default function OrderPage() {
                   </div>
                 ))}
                 {lines.length === 0 && (
-                  <div className="line first"><span className="ghost">{l('yourTextHere')}</span></div>
+                  <div className="line first">
+                    <span className="ghost">{l('yourTextHere')}</span>
+                  </div>
                 )}
               </div>
             </div>
@@ -166,6 +195,7 @@ export default function OrderPage() {
                 </div>
               </div>
             ))}
+
             <div className="row">
               <button
                 className="button ghost"
@@ -213,51 +243,75 @@ export default function OrderPage() {
                   <span>{l('painted')}</span>
                 </label>
               </div>
+
+              {finish === 'unpainted' && (
+                <p className="footnote">
+                  {l('kidsFinishNote')}
+                </p>
+              )}
             </div>
 
-            {/* Color (only if painted) */}
+            {/* Color & Designers only if painted */}
             {painted && (
-              <div className="stack">
-                <label className="label">{l('colorLabel')}</label>
-                <select
-                  value={color}
-                  onChange={e => setColor(e.target.value)}
-                  aria-label={l('chooseColor')}
-                >
-                  {colors.map(c => (
-                    <option key={c.hex} value={c.hex}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="swatchRow">
-                  {colors.map(c => (
+              <>
+                {/* Color */}
+                <div className="stack">
+                  <label className="label">{l('colorLabel')}</label>
+                  <select
+                    value={color}
+                    onChange={e => setColor(e.target.value)}
+                    aria-label={l('chooseColor')}
+                  >
+                    {colors.map(c => (
+                      <option key={c.hex} value={c.hex}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="swatchRow">
+                    {colors.map(c => (
+                      <button
+                        type="button"
+                        key={c.hex}
+                        aria-label={c.name}
+                        title={c.name}
+                        className={`swatch ${c.hex === color ? 'isActive' : ''}`}
+                        style={{ background: c.hex }}
+                        onClick={() => setColor(c.hex)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Designers (no customer option) */}
+                <div className="stack">
+                  <span className="label">{l('designerLabel')}</span>
+                  <div className="row paintByRow">
                     <button
                       type="button"
-                      key={c.hex}
-                      aria-label={c.name}
-                      title={c.name}
-                      className={`swatch ${c.hex === color ? 'isActive' : ''}`}
-                      style={{ background: c.hex }}
-                      onClick={() => setColor(c.hex)}
-                    />
-                  ))}
+                      className={`pillChoice ${paintBy === 'Unique' ? 'isActive' : ''}`}
+                      onClick={() => setPaintBy('Unique')}
+                    >
+                      {l('designerUnique')}
+                    </button>
+                    <button
+                      type="button"
+                      className={`pillChoice ${paintBy === 'Toxic C' ? 'isActive' : ''}`}
+                      onClick={() => setPaintBy('Toxic C')}
+                    >
+                      {l('designerToxicC')}
+                    </button>
+                    <button
+                      type="button"
+                      className={`pillChoice ${paintBy === 'Design X' ? 'isActive' : ''}`}
+                      onClick={() => setPaintBy('Design X')}
+                    >
+                      {l('designerDesignX')}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
-
-            {/* Paint by */}
-            <div className="stack">
-              <label className="label">{l('paintBy')}</label>
-              <select
-  value={paintBy}
-  onChange={e => setPaintBy(e.target.value as 'none' | 'lexylon' | 'customer')}
->
-                <option value="none">{l('paintByNone')}</option>
-                <option value="lexylon">{l('paintByLexylon')}</option>
-                <option value="customer">{l('paintByCustomer')}</option>
-              </select>
-            </div>
 
             {/* Email */}
             <div className="stack">
@@ -271,6 +325,55 @@ export default function OrderPage() {
               />
               <p className="footnote">{l('emailFootnote')}</p>
             </div>
+
+            {/* 💶 Price summary */}
+<div className="priceBox">
+  <div className="priceHeader">
+    <div className="priceTitle">
+      {lang === 'el' ? 'Εκτίμηση Τιμής' : 'Price Estimate'}
+    </div>
+    {letters > 0 && (
+      <div className="priceTag">
+        {letters} {lang === 'el' ? 'γράμματα' : 'letters'}
+      </div>
+    )}
+  </div>
+
+  {letters === 0 ? (
+    <p className="priceMuted">
+      {lang === 'el'
+        ? 'Προσθέστε γράμματα για να δείτε την τιμή.'
+        : 'Add letters to see the price.'}
+    </p>
+  ) : (
+    <>
+      <div className="priceRows">
+        <div className="priceLine">
+          <span>{lang === 'el' ? 'Πρώτα 5 γράμματα' : 'First 5 letters'}</span>
+          <span className="priceValue">15€</span>
+        </div>
+
+        {extraLetters > 0 && (
+          <div className="priceLine">
+            <span>{lang === 'el' ? 'Επιπλέον γράμματα' : 'Extra letters'}</span>
+            <span className="priceValue">
+              {extraLetters} × 3€ = {extraLetters * 3}€
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="priceDivider" />
+
+      <div className="priceTotalRow">
+        <span>{lang === 'el' ? 'Σύνολο' : 'Total'}:</span>
+        <span className="priceTotal">{price}€</span>
+      </div>
+    </>
+  )}
+</div>
+
+
 
             {/* Status + Submit */}
             {errorMsg && <p className="error">{errorMsg}</p>}
@@ -367,6 +470,32 @@ export default function OrderPage() {
         .success{ color:#26c281; }
         .error{ color:#ff6b6b; }
         .footnote{ color:#6b6b6b; font-size:.92rem; }
+        .muted{ color:#6b6b6b; }
+
+        /* Designers pills */
+        .paintByRow {
+          gap: .4rem;
+        }
+        .pillChoice {
+          border-radius: 999px;
+          padding: 0.4rem 0.9rem;
+          font-size: 0.9rem;
+          border: 1px solid var(--border);
+          background: rgba(255,255,255,0.7);
+          cursor: pointer;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+        .pillChoice.isActive {
+          background: var(--brand);
+          color: var(--brand-contrast);
+          border-color: transparent;
+        }
+
+        .priceTotal {
+          font-weight: 700;
+          margin-top: 0.15rem;
+        }
       `}</style>
     </section>
   );

@@ -157,7 +157,7 @@ const DICT: Record<Lang, Record<string, string>> = {
 
     // About – main block
     aboutWelcome: 'Welcome to Lexylon',
-    aboutTitle: 'We Have 25 Years of Experience in Carpentry',
+    aboutTitle: 'We Have 2 Years of Experience in Carpentry',
     aboutLead:
       'Every piece blends technology and hand craftsmanship...',
     aboutCheck1: 'Quality Control System',
@@ -166,7 +166,7 @@ const DICT: Record<Lang, Record<string, string>> = {
     aboutCheck4: 'Highly Professional Carpentry',
     aboutCheck5: 'Fast Turnaround',
     aboutCheck6: 'Careful Packaging',
-    aboutFounder: 'Teddy Saunders',
+    aboutFounder: 'Xenios Charalambous',
     aboutFounderRole: 'CEO & Founder',
     aboutSatisfied: 'Satisfied Clients',
     aboutMoreBtn: 'More About Us',
@@ -377,8 +377,22 @@ const ORDER_STRINGS: Record<Lang, Record<string, string>> = {
     featureFonts: 'Γραμματοσειρές: Script ή Sans',
     featureProof: 'Δοκίμιο πριν την κοπή',
     featurePackaging: 'Προσεκτική συσκευασία',
-    yourTextHere: 'Το κείμενό σας εδώ',
+    yourTextHere: 'Φτιάξτω μόνος σου',
+
+    // 🔹 ΝΕΑ ΚΛΕΙΔΙΑ για τη σελίδα Order
+    sizePriceTitle: 'Μεγέθη & Τιμές',
+    sizeLine: 'Κεφάλαιο: 8cm x 5cm   Μικρά: 6cm x 3,5cm',
+    priceLine: 'Τιμές: 5 γράμματα : €15   Κάθε έξτρα γράμμα +€3',
+    kidsFootnote:
+      '＊ Επιλέγουμε και υποστηρίζουμε την επιλογή «Unpainted» ώστε τα παιδιά να μπορούν να βάψουν το κομμάτι μόνα τους και να διασκεδάσουν δημιουργικά.',
+    kidsFinishNote:
+      'Δεν το βάφουμε επίτηδες — έτσι το παιδί μπορεί να το βάψει μόνο του και να διασκεδάσει δημιουργικά!',
+    designerLabel: 'Διάλεξε Designer:',
+    designerUnique: 'Unique',
+    designerToxicC: 'Toxic C',
+    designerDesignX: 'Design X',
   },
+
   en: {
     orderTitle: 'Start your order',
     orderSubtitle:
@@ -407,9 +421,23 @@ const ORDER_STRINGS: Record<Lang, Record<string, string>> = {
     featureFonts: 'Fonts: Script or Sans',
     featureProof: 'Proof before cutting',
     featurePackaging: 'Careful packaging',
-    yourTextHere: 'Your text here',
+    yourTextHere: 'Make your own',
+
+    // 🔹 NEW KEYS for Order page
+    sizePriceTitle: 'Sizes & Prices',
+    sizeLine: 'Capitals: 8cm x 5cm   Lowercase: 6cm x 3.5cm',
+    priceLine: 'Prices: 5 letters: €15   Each extra letter +€3',
+    kidsFootnote:
+      '* We love the “Unpainted” option so kids can paint the piece themselves and have fun.',
+    kidsFinishNote:
+      'We leave it unpainted so your kid can color it themselves and have creative fun!',
+    designerLabel: 'Choose Designer:',
+    designerUnique: 'Unique',
+    designerToxicC: 'Toxic C',
+    designerDesignX: 'Design X',
   },
 };
+
 
 // A small hook that exposes localized sizes, colors and t-like lookup
 export function useOrderDict() {

@@ -29,7 +29,7 @@ export default function AboutPage() {
             <div className="about__stat glass">
               <div className="about__numbers">
                 <div className="about__big">
-                  2,820<span className="about__plus">+</span>
+                  1000<span className="about__plus">+</span>
                 </div>
                 <div className="about__label">{t('aboutSatisfied')}</div>
               </div>
@@ -154,19 +154,19 @@ export default function AboutPage() {
 
           <ul className="who__stats">
             <li>
-              <div className="who__num">20<span>+</span></div>
+              <div className="who__num">2<span>+</span></div>
               <div className="who__meta">{t('statYears')}</div>
             </li>
             <li>
-              <div className="who__num">4,452<span>+</span></div>
+              <div className="who__num">1000<span>+</span></div>
               <div className="who__meta">{t('statProjects')}</div>
             </li>
             <li>
-              <div className="who__num">2,820<span>+</span></div>
+              <div className="who__num">1000<span>+</span></div>
               <div className="who__meta">{t('statClients')}</div>
             </li>
             <li>
-              <div className="who__num">52<span>+</span></div>
+              <div className="who__num">3<span>+</span></div>
               <div className="who__meta">{t('statCarpenters')}</div>
             </li>
           </ul>
