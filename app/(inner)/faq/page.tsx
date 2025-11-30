@@ -1,6 +1,5 @@
 'use client';
 
-
 import { useUI } from '../../providers';
 import FAQSection from '../../components/FAQSection';
 

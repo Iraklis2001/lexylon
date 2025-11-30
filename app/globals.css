@@ -1211,3 +1211,38 @@ input[type="radio"], input[type="checkbox"]{ transform: translateY(1px); }
   color: var(--brand);
   font-variant-numeric: tabular-nums;
 }
+
+/* Center the header (no button now) */
+.svc__head--center {
+  justify-content: center;
+  text-align: center;
+}
+
+/* Slightly larger, more elegant section title */
+.svc__title--big {
+  font-size: clamp(2.1rem, 3vw, 2.7rem);
+  letter-spacing: 0.03em;
+}
+
+/* Make sure cards all stretch nicely in the grid */
+.svc__grid--info {
+  align-items: stretch;
+}
+
+/* Card headings: stronger, tighter letter-spacing */
+.svcCard__head--strong {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Bullet text: slightly smaller with good line height */
+.svcList {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.svcList li + li {
+  margin-top: 0.3rem;
+}

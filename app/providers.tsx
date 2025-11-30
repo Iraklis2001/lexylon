@@ -63,8 +63,7 @@ const DICT: Record<Lang, Record<string, string>> = {
     // About – main block
     aboutWelcome: 'Καλώς ήρθατε στη Lexylon',
     aboutTitle: 'Έχουμε 25 χρόνια εμπειρίας σε ξυλουργικές υπηρεσίες',
-    aboutLead:
-      'Κάθε κατασκευή συνδυάζει τεχνολογία και χειροποίητη φροντίδα...',
+    aboutLead: 'Κάθε κατασκευή συνδυάζει τεχνολογία και χειροποίητη φροντίδα...',
     aboutCheck1: 'Σύστημα Ελέγχου Ποιότητας',
     aboutCheck2: '100% Ικανοποίηση Πελατών',
     aboutCheck3: 'Δέσμευση προς τους πελάτες',
@@ -92,12 +91,51 @@ const DICT: Record<Lang, Record<string, string>> = {
     // Who We Are / stats
     whoWeAre: 'Ποιοι είμαστε',
     whoTitle: 'Ειδικοί Ξυλουργοί που μπορείτε να εμπιστευτείτε',
-    whoLead:
-      'Παρέχουμε χειροποίητες κατασκευές με ακρίβεια και συνέπεια...',
+    whoLead: 'Παρέχουμε χειροποίητες κατασκευές με ακρίβεια και συνέπεια...',
     statYears: 'Χρόνια Εμπειρίας',
     statProjects: 'Ολοκληρωμένα έργα',
     statClients: 'Ικανοποιημένοι πελάτες',
     statCarpenters: 'Επαγγελματίες ξυλουργοί',
+
+    // Product Info Boxes
+    offerTitle: 'Τι προσφέρουμε',
+
+    box1Title: 'Υλικά & Κατασκευή',
+    box1L1: 'Ξύλο MDF/ply (8–12 mm) ανάλογα με το μέγεθος.',
+    box1L2: 'Κοπή με ακρίβεια, τρίψιμο ακμών/καμπύλων για λεία υφή.',
+    box1L3: 'Βαφές/βερνίκια νερού· ασφαλή για εσωτερικούς χώρους.',
+    box1L4: 'Προαιρετικά βάση στήριξης κατόπιν συνεννόησης.',
+
+    box2Title: 'Μεγέθη',
+    box2L1: 'A5 · A4 · A3',
+    box2L2: 'Το τελικό μήκος προσαρμόζεται από τον αριθμό γραμμάτων.',
+    box2L3: 'Κατάλληλα για ράφι, τοίχο, τραπέζι events.',
+
+    box3Title: 'Φινίρισμα & Χρώματα',
+    box3L1: 'Χωρίς βαφή (None) ή ματ βερνίκι.',
+    box3L2: 'Βαφή: μαύρο, λευκό, κόκκινο, πράσινο, μπλε, κίτρινο, πορτοκαλί.',
+    box3L3: 'Unique — χειροποίητη αισθητική.',
+    box3L4: 'Design X (+10€) ή Toxic C (+15€) — ειδικά στυλ βαφής.',
+    box3L5: 'Woodmaster – Xenios Charampus (+5€) προαιρετικά.',
+    box3L6: '※ Επιβαρύνσεις προστίθενται στην τιμή μεγέθους.',
+
+    box4Title: 'Τι περιλαμβάνει',
+    box4L1: 'Επιλογή γραμματοσειράς & ύψους.',
+    box4L2: 'Κοπή ξύλου με ακρίβεια.',
+    box4L3: 'Τρίψιμο & λεπτομέρειες.',
+    box4L4: 'Φινίρισμα (σύμφωνα με την επιλογή σας).',
+    box4L5: 'Τελικός έλεγχος & συσκευασία.',
+
+    box5Title: 'Χρόνος Παράδοσης',
+    box5L1: 'Συνήθως 3–5 εργάσιμες ημέρες.',
+    box5L2: 'Επείγον; Επικοινωνήστε.',
+    box5L3:
+      'Με Design X/Toxic C η προεπισκόπηση μπορεί να μην εμφανίζεται — εφαρμόζουμε custom στυλ & περιλαμβάνεται μικρό μυστικό δωράκι.',
+
+    box6Title: 'Αποστολή & Πληρωμή',
+    box6L1: 'Παραλαβή Κύπρο ή αποστολή κατόπιν υπολογισμού.',
+    box6L2: 'Πληρωμή: μετρητά/τραπεζική μεταφορά (κάρτα κατόπιν συνεννόησης).',
+    box6L3: 'Τηλ: +357 99943596 · Instagram: @lexylon.cy',
   },
 
   en: {
@@ -158,8 +196,7 @@ const DICT: Record<Lang, Record<string, string>> = {
     // About – main block
     aboutWelcome: 'Welcome to Lexylon',
     aboutTitle: 'We Have 2 Years of Experience in Carpentry',
-    aboutLead:
-      'Every piece blends technology and hand craftsmanship...',
+    aboutLead: 'Every piece blends technology and hand craftsmanship...',
     aboutCheck1: 'Quality Control System',
     aboutCheck2: '100% Satisfaction Guarantee',
     aboutCheck3: 'Commitment to Customers',
@@ -193,6 +230,46 @@ const DICT: Record<Lang, Record<string, string>> = {
     statProjects: 'Successful Project',
     statClients: 'Satisfied Clients',
     statCarpenters: 'Professional Carpenter',
+
+    // Product Info Boxes
+    offerTitle: 'What we offer',
+
+    box1Title: 'Materials & Build',
+    box1L1: 'MDF/plywood (8–12 mm) depending on size.',
+    box1L2: 'Precision cut, edges/curves sanded smooth.',
+    box1L3: 'Water-based paints/clear coats; safe for indoor use.',
+    box1L4: 'Optional stand/base on request.',
+
+    box2Title: 'Sizes',
+    box2L1: 'A5 · A4 · A3',
+    box2L2: 'Final length varies with word length.',
+    box2L3: 'Great for shelves, walls, and event tables.',
+
+    box3Title: 'Finish & Colours',
+    box3L1: 'None (unpainted) or matte clear.',
+    box3L2: 'Painted: black, white, red, green, blue, yellow, orange.',
+    box3L3: 'Unique — hand-painted aesthetic.',
+    box3L4: 'Design X (+€10) or Toxic C (+€15) — special paint styles.',
+    box3L5: 'Woodmaster – Xenios Charampus (+€5) optional.',
+    box3L6: '※ Surcharges are added to the base size price.',
+
+    box4Title: 'What’s Included',
+    box4L1: 'Font & height selection.',
+    box4L2: 'Precision cutting.',
+    box4L3: 'Sanding & detailing.',
+    box4L4: 'Chosen finish applied.',
+    box4L5: 'Final QA & packaging.',
+
+    box5Title: 'Turnaround',
+    box5L1: 'Typically 3–5 business days.',
+    box5L2: 'Rush? Get in touch.',
+    box5L3:
+      'With Design X/Toxic C the preview may be hidden—custom styling & a small mystery gift included.',
+
+    box6Title: 'Shipping & Payment',
+    box6L1: 'Pickup in Cyprus or shipping on request.',
+    box6L2: 'Payment: cash/bank transfer (card on request).',
+    box6L3: 'Phone: +357 99943596 · Instagram: @lexylon.cy',
   },
 };
 
@@ -324,30 +401,28 @@ const ORDER_SIZES: Record<Lang, OrderSize[]> = {
 
 const ORDER_COLORS: Record<Lang, OrderColor[]> = {
   el: [
-    { name: 'Μαύρο',       hex: '#111111' },
-    { name: 'Ζεστό καφέ',  hex: '#7a4b27' },
-    { name: 'Καρυδιά',     hex: '#5a3b2b' },
-    { name: 'Λευκό',       hex: '#ffffff' },
-    { name: 'Άμμος',       hex: '#d7c7a9' },
-    { name: 'Κεραμιδί',    hex: '#b45a3c' },
-    { name: 'Πράσινο',     hex: '#365d43' },
-    { name: 'Μπλε',        hex: '#244a7a' },
+    { name: 'Μαύρο', hex: '#111111' },
+    { name: 'Ζεστό καφέ', hex: '#7a4b27' },
+    { name: 'Καρυδιά', hex: '#5a3b2b' },
+    { name: 'Λευκό', hex: '#ffffff' },
+    { name: 'Άμμος', hex: '#d7c7a9' },
+    { name: 'Κεραμιδί', hex: '#b45a3c' },
+    { name: 'Πράσινο', hex: '#365d43' },
+    { name: 'Μπλε', hex: '#244a7a' },
   ],
   en: [
-    { name: 'Black',      hex: '#111111' },
+    { name: 'Black', hex: '#111111' },
     { name: 'Warm Brown', hex: '#7a4b27' },
-    { name: 'Walnut',     hex: '#5a3b2b' },
-    { name: 'White',      hex: '#ffffff' },
-    { name: 'Sand',       hex: '#d7c7a9' },
-    { name: 'Brick',      hex: '#b45a3c' },
-    { name: 'Forest',     hex: '#365d43' },
-    { name: 'Deep Blue',  hex: '#244a7a' },
+    { name: 'Walnut', hex: '#5a3b2b' },
+    { name: 'White', hex: '#ffffff' },
+    { name: 'Sand', hex: '#d7c7a9' },
+    { name: 'Brick', hex: '#b45a3c' },
+    { name: 'Forest', hex: '#365d43' },
+    { name: 'Deep Blue', hex: '#244a7a' },
   ],
 };
 
 // UI strings for the Order page
-// Add these keys to your DICT[el] and DICT[en] objects in the same file if you prefer
-// keeping all strings together. If your DICT is above, extend it with these keys:
 const ORDER_STRINGS: Record<Lang, Record<string, string>> = {
   el: {
     orderTitle: 'Ξεκινήστε την παραγγελία σας',
@@ -379,7 +454,6 @@ const ORDER_STRINGS: Record<Lang, Record<string, string>> = {
     featurePackaging: 'Προσεκτική συσκευασία',
     yourTextHere: 'Φτιάξτω μόνος σου',
 
-    // 🔹 ΝΕΑ ΚΛΕΙΔΙΑ για τη σελίδα Order
     sizePriceTitle: 'Μεγέθη & Τιμές',
     sizeLine: 'Κεφάλαιο: 8cm x 5cm   Μικρά: 6cm x 3,5cm',
     priceLine: 'Τιμές: 5 γράμματα : €15   Κάθε έξτρα γράμμα +€3',
@@ -423,7 +497,6 @@ const ORDER_STRINGS: Record<Lang, Record<string, string>> = {
     featurePackaging: 'Careful packaging',
     yourTextHere: 'Make your own',
 
-    // 🔹 NEW KEYS for Order page
     sizePriceTitle: 'Sizes & Prices',
     sizeLine: 'Capitals: 8cm x 5cm   Lowercase: 6cm x 3.5cm',
     priceLine: 'Prices: 5 letters: €15   Each extra letter +€3',
@@ -437,7 +510,6 @@ const ORDER_STRINGS: Record<Lang, Record<string, string>> = {
     designerDesignX: 'Design X',
   },
 };
-
 
 // A small hook that exposes localized sizes, colors and t-like lookup
 export function useOrderDict() {

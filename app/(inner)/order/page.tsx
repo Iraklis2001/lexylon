@@ -16,6 +16,7 @@ export default function OrderPage() {
   const [color, setColor] = React.useState(colors[0].hex);
   const [paintBy, setPaintBy] = React.useState<PaintBy>('Unique');
   const [email, setEmail] = React.useState('');
+  const [notes, setNotes] = React.useState(''); // used as "Comments" when Toxic C / Design X
 
   // submit state
   const [submitting, setSubmitting] = React.useState(false);
@@ -34,12 +35,25 @@ export default function OrderPage() {
     [color, colors]
   );
 
+  // when Toxic C or Design X is chosen -> hide preview, show comments
+  const isMystery = paintBy === 'Toxic C' || paintBy === 'Design X';
+
   // 🔢 price calculation
   const price = React.useMemo(() => {
     if (letters === 0) return 0;
+
     const extraLetters = Math.max(letters - 5, 0);
+
+    // New pricing rules:
+    // - Unique: first 5 letters = 15€
+    // - Toxic C / Design X: first 5 letters = 40€
+    // - Extra letters (all cases): 3€ each
+    if (paintBy === 'Toxic C' || paintBy === 'Design X') {
+      return 40 + extraLetters * 3;
+    }
+
     return 15 + extraLetters * 3;
-  }, [letters]);
+  }, [letters, paintBy]);
 
   const extraLetters = Math.max(letters - 5, 0);
 
@@ -74,9 +88,10 @@ export default function OrderPage() {
       color: colorObj,          // null if unpainted
       paintBy,                  // 'Unique' | 'Toxic C' | 'Design X'
       email,
-      notes: '',
+      notes,                    // <-- comments when Toxic C / Design X
       letterCount: letters,
       priceEuro: price,         // 🔥 send calculated price as well
+      previewHidden: isMystery, // optional flag if you want it on backend
     };
 
     try {
@@ -90,7 +105,7 @@ export default function OrderPage() {
 
       setSuccessId(json.orderId || 'OK');
       // Optional reset:
-      // setLines(['']); setEmail('');
+      // setLines(['']); setEmail(''); setNotes('');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Something went wrong';
       setErrorMsg(message);
@@ -132,43 +147,96 @@ export default function OrderPage() {
             </p>
           </section>
 
-          {/* Preview */}
-          <section className="glassCard">
-            <h2 className="h2">{l('preview')}</h2>
-            <div
-              className="preview"
-              style={{
-                background: painted ? chosenColor.hex : '#f3efea',
-                color: painted
-                  ? (chosenColor.hex.toLowerCase() === '#ffffff' ? '#111' : '#fff')
-                  : '#1b1209',
-                borderColor: painted ? 'transparent' : '#dfd7cc',
-              }}
-            >
-              <div className="previewInner">
-                {lines.map((text, i) => (
-                  <div key={i} className={`line ${i === 0 ? 'first' : ''}`}>
-                    {text || <span className="ghost">{l('yourTextHere')}</span>}
-                  </div>
-                ))}
-                {lines.length === 0 && (
-                  <div className="line first">
-                    <span className="ghost">{l('yourTextHere')}</span>
-                  </div>
-                )}
+          {/* Preview OR Comments (when Toxic C / Design X) */}
+          {isMystery ? (
+            <section className="glassCard">
+              <h2 className="h2">
+                {lang === 'el' ? 'Σχόλια' : 'Comments'}
+              </h2>
+              <textarea
+                rows={6}
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder={
+                  lang === 'el'
+                    ? 'Γράψε εδώ οδηγίες ή ιδέες για το custom σχέδιο…'
+                    : 'Write any instructions or ideas for your custom design…'
+                }
+              />
+              <p className="footnote" style={{ marginTop: '.5rem' }}>
+                {lang === 'el'
+                  ? 'Η προεπισκόπηση απενεργοποιείται όταν επιλέγεις Toxic C ή Design X. Θα ετοιμάσουμε ένα custom σχέδιο και θα σου στείλουμε δοκιμή για έγκριση. Κάθε παραγγελία με Toxic C ή Design X περιλαμβάνει και ένα μυστικό δώρο.'
+                  : 'Preview is disabled when you choose Toxic C or Design X. We’ll prepare a custom style and send you a proof for approval. Every Toxic C and Design X order includes a mystery gift.'}
+              </p>
+            </section>
+          ) : (
+            <section className="glassCard">
+              <h2 className="h2">{l('preview')}</h2>
+              <div
+                className="preview"
+                style={{
+                  background: painted ? chosenColor.hex : '#f3efea',
+                  color: painted
+                    ? (chosenColor.hex.toLowerCase() === '#ffffff' ? '#111' : '#fff')
+                    : '#1b1209',
+                  borderColor: painted ? 'transparent' : '#dfd7cc',
+                }}
+              >
+                <div className="previewInner">
+                  {lines.map((text, i) => (
+                    <div key={i} className={`line ${i === 0 ? 'first' : ''}`}>
+                      {text || <span className="ghost">{l('yourTextHere')}</span>}
+                    </div>
+                  ))}
+                  {lines.length === 0 && (
+                    <div className="line first">
+                      <span className="ghost">{l('yourTextHere')}</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <ul className="featureBadges">
-              <li>{l('featureFonts')}</li>
-              <li>{l('featureProof')}</li>
-              <li>{l('featurePackaging')}</li>
-            </ul>
-          </section>
+              <ul className="featureBadges">
+                <li>{l('featureFonts')}</li>
+                <li>{l('featureProof')}</li>
+                <li>{l('featurePackaging')}</li>
+              </ul>
+            </section>
+          )}
 
           {/* FORM */}
           <form className="glassCard" onSubmit={handleSubmit}>
             <h2 className="h2">{l('details')}</h2>
+
+            {/* Designers (only if painted) – moved to top under Details */}
+            {painted && (
+              <div className="stack">
+                <span className="label">{l('designerLabel')}</span>
+                <div className="row paintByRow">
+                  <button
+                    type="button"
+                    className={`pillChoice ${paintBy === 'Unique' ? 'isActive' : ''}`}
+                    onClick={() => setPaintBy('Unique')}
+                  >
+                    {l('designerUnique')}
+                  </button>
+                  <button
+                    type="button"
+                    className={`pillChoice ${paintBy === 'Toxic C' ? 'isActive' : ''}`}
+                    onClick={() => setPaintBy('Toxic C')}
+                  >
+                    {l('designerToxicC')}
+                  </button>
+                  <button
+                    type="button"
+                    className={`pillChoice ${paintBy === 'Design X' ? 'isActive' : ''}`}
+                    onClick={() => setPaintBy('Design X')}
+                  >
+                    {l('designerDesignX')}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Lines */}
             {lines.map((val, i) => (
@@ -251,7 +319,7 @@ export default function OrderPage() {
               )}
             </div>
 
-            {/* Color & Designers only if painted */}
+            {/* Color only if painted */}
             {painted && (
               <>
                 {/* Color */}
@@ -282,34 +350,6 @@ export default function OrderPage() {
                     ))}
                   </div>
                 </div>
-
-                {/* Designers (no customer option) */}
-                <div className="stack">
-                  <span className="label">{l('designerLabel')}</span>
-                  <div className="row paintByRow">
-                    <button
-                      type="button"
-                      className={`pillChoice ${paintBy === 'Unique' ? 'isActive' : ''}`}
-                      onClick={() => setPaintBy('Unique')}
-                    >
-                      {l('designerUnique')}
-                    </button>
-                    <button
-                      type="button"
-                      className={`pillChoice ${paintBy === 'Toxic C' ? 'isActive' : ''}`}
-                      onClick={() => setPaintBy('Toxic C')}
-                    >
-                      {l('designerToxicC')}
-                    </button>
-                    <button
-                      type="button"
-                      className={`pillChoice ${paintBy === 'Design X' ? 'isActive' : ''}`}
-                      onClick={() => setPaintBy('Design X')}
-                    >
-                      {l('designerDesignX')}
-                    </button>
-                  </div>
-                </div>
               </>
             )}
 
@@ -327,53 +367,53 @@ export default function OrderPage() {
             </div>
 
             {/* 💶 Price summary */}
-<div className="priceBox">
-  <div className="priceHeader">
-    <div className="priceTitle">
-      {lang === 'el' ? 'Εκτίμηση Τιμής' : 'Price Estimate'}
-    </div>
-    {letters > 0 && (
-      <div className="priceTag">
-        {letters} {lang === 'el' ? 'γράμματα' : 'letters'}
-      </div>
-    )}
-  </div>
+            <div className="priceBox">
+              <div className="priceHeader">
+                <div className="priceTitle">
+                  {lang === 'el' ? 'Εκτίμηση Τιμής' : 'Price Estimate'}
+                </div>
+                {letters > 0 && (
+                  <div className="priceTag">
+                    {letters} {lang === 'el' ? 'γράμματα' : 'letters'}
+                  </div>
+                )}
+              </div>
 
-  {letters === 0 ? (
-    <p className="priceMuted">
-      {lang === 'el'
-        ? 'Προσθέστε γράμματα για να δείτε την τιμή.'
-        : 'Add letters to see the price.'}
-    </p>
-  ) : (
-    <>
-      <div className="priceRows">
-        <div className="priceLine">
-          <span>{lang === 'el' ? 'Πρώτα 5 γράμματα' : 'First 5 letters'}</span>
-          <span className="priceValue">15€</span>
-        </div>
+              {letters === 0 ? (
+                <p className="priceMuted">
+                  {lang === 'el'
+                    ? 'Προσθέστε γράμματα για να δείτε την τιμή.'
+                    : 'Add letters to see the price.'}
+                </p>
+              ) : (
+                <>
+                  <div className="priceRows">
+                    <div className="priceLine">
+                      <span>{lang === 'el' ? 'Πρώτα 5 γράμματα' : 'First 5 letters'}</span>
+                      <span className="priceValue">
+                        {paintBy === 'Toxic C' || paintBy === 'Design X' ? '40€' : '15€'}
+                      </span>
+                    </div>
 
-        {extraLetters > 0 && (
-          <div className="priceLine">
-            <span>{lang === 'el' ? 'Επιπλέον γράμματα' : 'Extra letters'}</span>
-            <span className="priceValue">
-              {extraLetters} × 3€ = {extraLetters * 3}€
-            </span>
-          </div>
-        )}
-      </div>
+                    {extraLetters > 0 && (
+                      <div className="priceLine">
+                        <span>{lang === 'el' ? 'Επιπλέον γράμματα' : 'Extra letters'}</span>
+                        <span className="priceValue">
+                          {extraLetters} × 3€ = {extraLetters * 3}€
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-      <div className="priceDivider" />
+                  <div className="priceDivider" />
 
-      <div className="priceTotalRow">
-        <span>{lang === 'el' ? 'Σύνολο' : 'Total'}:</span>
-        <span className="priceTotal">{price}€</span>
-      </div>
-    </>
-  )}
-</div>
-
-
+                  <div className="priceTotalRow">
+                    <span>{lang === 'el' ? 'Σύνολο' : 'Total'}:</span>
+                    <span className="priceTotal">{price}€</span>
+                  </div>
+                </>
+              )}
+            </div>
 
             {/* Status + Submit */}
             {errorMsg && <p className="error">{errorMsg}</p>}
