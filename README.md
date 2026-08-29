@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lexylon — Custom Wooden Letter Signs
 
-## Getting Started
+**Live site: [lexylon.vercel.app](https://lexylon.vercel.app)**
 
-First, run the development server:
+Bilingual (Greek / English) website for Lexylon, a business making custom cut wooden letter
+signs and name plaques for weddings, birthdays, newborns, classrooms and gifts. Visitors browse
+the gallery, read how the pieces are made, and submit a made-to-order request that is emailed
+straight to the owner.
+
+## Features
+
+- **Greek / English switch** and light / dark theme, handled by a shared UI provider
+- **Pages** — home with a fading hero slideshow, gallery, order, process, about and FAQ
+- **Order form** capturing the text lines, size (A5 / A4 / A3), finish (unpainted or painted),
+  colour choice, who does the painting, and free-text notes
+- **Order delivery by email** — submissions are formatted into an HTML summary with a generated
+  order reference and sent through [Resend](https://resend.com)
+- Keyboard and pointer controls on the hero slideshow, with pause on hover
+
+## Stack
+
+Next.js 15 (App Router, route groups) · React 19 · TypeScript · Resend · Vercel
+
+## Environment variables
+
+Create `.env.local` before running:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+RESEND_API_KEY=your_resend_api_key
+OWNER_EMAIL=where_orders_should_arrive@example.com
+FROM_EMAIL=orders@yourdomain.com
+SITE_NAME=Lexylon
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Getting started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Path | Purpose |
+|------|---------|
+| `app/page.tsx` | Home page and hero slideshow |
+| `app/(inner)/` | Gallery, order, process, about and FAQ pages |
+| `app/api/order/route.ts` | Validates an order and emails it via Resend |
+| `app/providers.tsx` | Language dictionary and theme state |
+| `app/components/` | `ContactBar`, `FAQSection` |
+| `public/slides/` | Hero slideshow images |
